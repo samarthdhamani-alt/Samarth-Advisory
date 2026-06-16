@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BizIQ — AI Business Health Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #060b18;
+    --surface: #0d1525;
+    --surface2: #111d30;
+    --border: #1a2d4a;
+    --border2: #243a58;
+    --accent: #3b7fff;
+    --accent2: #00d4aa;
+    --accent3: #7c3aed;
+    --text: #e8f0fe;
+    --muted: #5a7090;
+    --muted2: #8aa4c0;
+    --green: #00c896;
+    --yellow: #f5a623;
+    --red: #ff4757;
+    --orange: #ff6b35;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── ANIMATED GRID ── */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,127,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,127,255,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    animation: drift 18s ease-in-out infinite;
+  }
+  .glow-orb-1 { width: 600px; height: 600px; background: rgba(59,127,255,0.07); top: -200px; right: -100px; animation-delay: 0s; }
+  .glow-orb-2 { width: 500px; height: 500px; background: rgba(0,212,170,0.05); bottom: -150px; left: -100px; animation-delay: -9s; }
+  .glow-orb-3 { width: 400px; height: 400px; background: rgba(124,58,237,0.05); top: 40%; left: 30%; animation-delay: -4s; }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(30px,-20px) scale(1.05); }
+    66% { transform: translate(-20px,30px) scale(0.95); }
+  }
+
+  /* ── LAYOUT ── */
+  .page { position: relative; z-index: 1; }
+
+  /* ── HERO HEADER ── */
+  .hero {
+    padding: 48px 24px 40px;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid rgba(59,127,255,0.3);
+    border-radius: 100px;
+    background: rgba(59,127,255,0.08);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 .grad {
+    background: linear-gradient(135deg, #3b7fff 0%, #00d4aa 50%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 15px;
+    color: var(--muted2);
+    line-height: 1.7;
+    max-width: 560px;
+    margin-bottom: 32px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .hero-stat { display: flex; flex-direction: column; gap: 2px; }
+  .hero-stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent2); }
+  .hero-stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── MAIN CONTAINER ── */
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── SECTION CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: var(--border2); }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(59,127,255,0.3), transparent);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .card-icon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted2);
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .field-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .field-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+
+  @media (max-width: 560px) {
+    .field-grid-2, .field-grid-3, .field-grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px 14px;
+    background: #080e1c;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,127,255,0.12);
+  }
+
+  input::placeholder { color: var(--muted); }
+
+  .margin-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #080e1c;
+    border-radius: 8px;
+    font-size: 12px;
+    margin-top: 10px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── RUN BUTTON ── */
+  .run-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #3b7fff 0%, #00d4aa 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: 8px;
+  }
+
+  .run-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .run-btn:active { transform: translateY(0); }
+  .run-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+  .run-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+  }
+
+  .btn-sub {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── RESULTS ── */
+  #results { display: none; }
+
+  .results-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 28px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .results-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  }
+
+  .results-biz { flex: 1; }
+  .results-eyebrow { font-size: 11px; color: var(--accent2); font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .results-name { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .results-industry { font-size: 13px; color: var(--muted2); }
+
+  .big-score {
+    display: flex; flex-direction: column; align-items: flex-end;
+  }
+  .big-score-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+  .big-score-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex: 1;
+    min-width: max-content;
+    padding: 8px 14px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--muted2);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── SCORE RINGS GRID ── */
+  .rings-grid {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 8px 0;
+  }
+
+  .ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .ring-label { font-size: 11px; color: var(--muted); text-align: center; max-width: 70px; letter-spacing: 0.3px; }
+
+  /* ── STAT TILES ── */
+  .stat-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+
+  .stat-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-tile-val { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .stat-tile-name { font-size: 11px; font-weight: 600; color: var(--text); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-tile-sub { font-size: 10px; color: var(--muted); }
+
+  /* ── DIMENSION BARS ── */
+  .dim-row { margin-bottom: 20px; }
+  .dim-row-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .dim-row-label { font-size: 13px; font-weight: 500; }
+  .dim-row-right { display: flex; align-items: center; gap: 8px; }
+  .dim-score-num { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
+  .dim-score-tier { font-size: 11px; color: var(--muted); }
+
+  .bar-track { background: #0c1422; border-radius: 6px; height: 8px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 6px; transition: width 1.2s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
+  .bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+  .weight-tag {
+    display: inline-block;
+    padding: 2px 7px;
+    background: rgba(59,127,255,0.1);
+    border-radius: 4px;
+    font-size: 10px;
+    color: var(--accent);
+    margin-left: 6px;
+    font-weight: 600;
+  }
+
+  .formula-box {
+    background: #080e1c;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--muted2);
+    line-height: 1.6;
+  }
+
+  /* ── RISK FLAGS ── */
+  .flag {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 3px solid transparent;
+  }
+  .flag.critical { background: rgba(255,71,87,0.07); border-color: var(--red); }
+  .flag.high { background: rgba(245,166,35,0.07); border-color: var(--yellow); }
+  .flag.medium { background: rgba(59,127,255,0.06); border-color: var(--accent); }
+
+  .flag-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .flag-level { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+  .flag.critical .flag-level { color: var(--red); }
+  .flag.high .flag-level { color: var(--yellow); }
+  .flag.medium .flag-level { color: var(--accent); }
+  .flag-msg { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  .no-flags { text-align: center; padding: 40px; color: var(--green); font-size: 14px; }
+
+  /* ── RECOMMENDATIONS ── */
+  .rec {
+    padding: 16px;
+    border-radius: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .rec.high-p { border-left-color: var(--red); }
+  .rec.med-p { border-left-color: var(--yellow); }
+  .rec.low-p { border-left-color: var(--accent2); }
+
+  .rec-tags { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .rec-tag {
+    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .rec-tag.cat { background: rgba(59,127,255,0.12); color: var(--accent2); }
+  .rec-tag.hp { background: rgba(255,71,87,0.12); color: var(--red); }
+  .rec-tag.mp { background: rgba(245,166,35,0.12); color: var(--yellow); }
+  .rec-tag.lp { background: rgba(0,200,150,0.12); color: var(--green); }
+
+  .rec-text { font-size: 13px; color: var(--text); line-height: 1.65; }
+
+  /* ── AI SUMMARY ── */
+  .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .ai-gem {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .ai-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; }
+  .ai-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .ai-text { font-size: 13px; line-height: 1.85; color: var(--muted2); white-space: pre-wrap; }
+
+  .typing-cursor { display: inline-block; width: 2px; height: 14px; background: var(--accent2); margin-left: 2px; animation: blink 0.7s infinite; vertical-align: middle; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  .ai-loading { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; padding: 20px 0; }
+  .ai-spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── BACK BUTTON ── */
+  .back-btn {
+    padding: 9px 18px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted2);
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+  .back-btn:hover { border-color: var(--border2); color: var(--text); }
+
+  /* ── ALERT BOX ── */
+  .critical-alert {
+    background: rgba(255,71,87,0.07);
+    border: 1px solid rgba(255,71,87,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .critical-alert-title { font-size: 12px; font-weight: 700; color: var(--red); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .critical-alert-item { font-size: 12px; color: #fca5a5; margin-bottom: 3px; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 11px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ── LOADING OVERLAY ── */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(6,11,24,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    backdrop-filter: blur(8px);
+  }
+  .loading-overlay.show { display: flex; }
+  .loading-spinner-lg { width: 48px; height: 48px; border: 3px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .loading-txt { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; color: var(--text); }
+  .loading-sub { font-size: 12px; color: var(--muted); }
+
+  /* ── TRANSITIONS ── */
+  #input-section { transition: opacity 0.3s; }
+  #results { animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner-lg"></div>
+  <div class="loading-txt">Analysing Business Health</div>
+  <div class="loading-sub">Running AI scoring engine...</div>
+</div>
+
+<div class="page">
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge"><span class="dot"></span> AI-Powered · Real-Time Analysis</div>
+    <h1>Know your business<br><span class="grad">health score.</span></h1>
+    <p>Enter 11 business metrics. Our AI scoring engine analyses your performance across five dimensions, benchmarks you against your industry, and delivers a prioritised action plan — in seconds.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-val">5</span><span class="hero-stat-label">Dimensions</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">11</span><span class="hero-stat-label">Metrics</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">5</span><span class="hero-stat-label">Industries</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">&lt;2s</span><span class="hero-stat-label">Analysis Time</span></div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- INPUT SECTION -->
+    <div id="input-section">
+
+      <!-- Business Profile -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(59,127,255,0.12)">🏢</div>
+          <span class="card-title">Business Profile</span>
+        </div>
+        <div class="field-grid-2">
+          <div class="field">
+            <label>Business Name <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input type="text" id="bizName" placeholder="e.g. Al Safa Trading Co." />
+          </div>
+          <div class="field">
+            <label>Industry Sector</label>
+            <select id="industry">
+              <option value="retail">Retail</option>
+              <option value="restaurant">Restaurant / F&B</option>
+              <option value="services">Professional Services</option>
+              <option value="ecommerce">E-Commerce</option>
+              <option value="manufacturing">Manufacturing</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(0,200,150,0.12)">💰</div>
+          <span class="card-title">Financial Health</span>
+        </div>
+        <div class="field-grid-2">
+          <div class="field">
+            <label>Monthly Revenue (AED)</label>
+            <input type="number" id="revenue" value="85000" />
+          </div>
+          <div class="field">
+            <label>Monthly Expenses (AED)</label>
+            <input type="number" id="expenses" value="72000" />
+          </div>
+        </div>
+        <div class="margin-pill" id="marginPill">
+          Profit Margin: <strong id="marginVal" style="margin-left:4px">—</strong>
+          <span id="marginBench" style="color:var(--muted);margin-left:6px;font-size:11px"></span>
+        </div>
+      </div>
+
+      <!-- Customer -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(124,58,237,0.12)">⭐</div>
+          <span class="card-title">Customer Experience</span>
+        </div>
+        <div class="field-grid-2">
+          <div class="field">
+            <label>Customer Rating (out of 5)</label>
+            <input type="number" id="customerRating" value="3.8" step="0.1" min="0" max="5" />
+          </div>
+          <div class="field">
+            <label>Customer Return Rate (%)</label>
+            <input type="number" id="customerReturn" value="42" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Operations -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(245,166,35,0.12)">⚙️</div>
+          <span class="card-title">Operational Efficiency</span>
+        </div>
+        <div class="field-grid-3">
+          <div class="field">
+            <label>Employee Productivity (%)</label>
+            <input type="number" id="employeeProductivity" value="68" />
+          </div>
+          <div class="field">
+            <label>Avg Fulfillment (days)</label>
+            <input type="number" id="fulfillmentDays" value="5" />
+          </div>
+          <div class="field">
+            <label>Defect / Error Rate (%)</label>
+            <input type="number" id="defectRate" value="4" step="0.1" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Marketing & Growth -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(255,107,53,0.12)">📈</div>
+          <span class="card-title">Marketing & Growth</span>
+        </div>
+        <div class="field-grid-4">
+          <div class="field">
+            <label>Marketing ROI (×)</label>
+            <input type="number" id="marketingROI" value="2.8" step="0.1" />
+          </div>
+          <div class="field">
+            <label>Conversion Rate (%)</label>
+            <input type="number" id="conversionRate" value="3.2" step="0.1" />
+          </div>
+          <div class="field">
+            <label>Revenue Growth (%)</label>
+            <input type="number" id="growthRate" value="6.5" step="0.1" />
+          </div>
+          <div class="field">
+            <label>New Customers / Mo</label>
+            <input type="number" id="newCustomers" value="38" />
+          </div>
+        </div>
+      </div>
+
+      <button class="run-btn" id="runBtn" onclick="runAnalysis()">⚡ Run AI Analysis</button>
+      <p class="btn-sub">Weighted multi-factor scoring · Industry benchmarks · AI executive summary</p>
+    </div>
+
+    <!-- RESULTS SECTION -->
+    <div id="results">
+
+      <div class="results-header">
+        <div class="results-biz">
+          <div class="results-eyebrow">Analysis Complete</div>
+          <div class="results-name" id="rBizName">—</div>
+          <div class="results-industry" id="rIndustry">—</div>
+        </div>
+        <div class="big-score">
+          <div class="big-score-val" id="rOverallScore">—</div>
+          <div class="big-score-label" id="rHealthLabel">—</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('overview')">Overview</button>
+        <button class="tab" onclick="switchTab('scores')">Dimension Scores</button>
+        <button class="tab" onclick="switchTab('risks')">Risk Flags</button>
+        <button class="tab" onclick="switchTab('recs')">Recommendations</button>
+        <button class="tab" onclick="switchTab('ai')">AI Summary</button>
+      </div>
+
+      <!-- OVERVIEW -->
+      <div class="tab-panel active" id="panel-overview">
+        <div class="card">
+          <div class="rings-grid" id="ringsGrid"></div>
+        </div>
+        <div class="stat-tiles">
+          <div class="stat-tile">
+            <div class="stat-tile-val" id="st-margin">—</div>
+            <div class="stat-tile-name">Profit Margin</div>
+            <div class="stat-tile-sub" id="st-margin-sub">—</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-tile-val" id="st-rating">—</div>
+            <div class="stat-tile-name">Customer Rating</div>
+            <div class="stat-tile-sub" id="st-rating-sub">—</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-tile-val" id="st-flags">—</div>
+            <div class="stat-tile-name">Risk Flags</div>
+            <div class="stat-tile-sub" id="st-flags-sub">—</div>
+          </div>
+        </div>
+        <div id="criticalAlert"></div>
+        <button class="back-btn" onclick="goBack()">← Edit Inputs</button>
+      </div>
+
+      <!-- DIMENSION SCORES -->
+      <div class="tab-panel" id="panel-scores">
+        <div class="card">
+          <div id="dimBars"></div>
+          <div class="formula-box" id="formulaBox"></div>
+        </div>
+      </div>
+
+      <!-- RISKS -->
+      <div class="tab-panel" id="panel-risks">
+        <div id="flagsList"></div>
+      </div>
+
+      <!-- RECOMMENDATIONS -->
+      <div class="tab-panel" id="panel-recs">
+        <div id="recsList"></div>
+      </div>
+
+      <!-- AI SUMMARY -->
+      <div class="tab-panel" id="panel-ai">
+        <div class="card">
+          <div class="ai-header">
+            <div class="ai-gem">✦</div>
+            <div>
+              <div class="ai-title">AI Executive Summary</div>
+              <div class="ai-sub">Generated by Claude Sonnet · Real-time analysis</div>
+            </div>
+          </div>
+          <div id="aiContent">
+            <div class="ai-loading"><div class="ai-spinner"></div> Generating executive summary...</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    Built by Samarth Dhamani · JESS Arabian Ranches · Science Fair 2026 · Powered by Claude AI
+  </div>
+</div>
+
+<script>
+// ── BENCHMARKS ──────────────────────────────────────────────────────────
+const BENCHMARKS = {
+  retail:        { profitMargin:5,  customerScore:4.1, employeeProductivity:72, marketingROI:3.2, growthRate:4.5 },
+  restaurant:    { profitMargin:6,  customerScore:4.3, employeeProductivity:68, marketingROI:2.8, growthRate:3.8 },
+  services:      { profitMargin:18, customerScore:4.4, employeeProductivity:80, marketingROI:4.1, growthRate:6.2 },
+  ecommerce:     { profitMargin:12, customerScore:4.2, employeeProductivity:77, marketingROI:5.0, growthRate:9.5 },
+  manufacturing: { profitMargin:8,  customerScore:3.9, employeeProductivity:74, marketingROI:2.5, growthRate:3.2 },
+};
+const INDUSTRY_LABELS = { retail:'Retail', restaurant:'Restaurant / F&B', services:'Professional Services', ecommerce:'E-Commerce', manufacturing:'Manufacturing' };
+const WEIGHTS = { financial:0.30, customer:0.20, operations:0.20, marketing:0.15, growth:0.15 };
+
+// ── LIVE MARGIN PREVIEW ──────────────────────────────────────────────────
+function updateMarginPreview() {
+  const rev = parseFloat(document.getElementById('revenue').value) || 0;
+  const exp = parseFloat(document.getElementById('expenses').value) || 0;
+  const ind = document.getElementById('industry').value;
+  const bench = BENCHMARKS[ind];
+  if (rev > 0) {
+    const margin = ((rev - exp) / rev * 100);
+    const el = document.getElementById('marginVal');
+    el.textContent = margin.toFixed(1) + '%';
+    el.style.color = margin >= bench.profitMargin ? '#00c896' : margin > 0 ? '#f5a623' : '#ff4757';
+    document.getElementById('marginBench').textContent = `Benchmark: ${bench.profitMargin}%`;
+  }
+}
+['revenue','expenses','industry'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateMarginPreview);
+});
+updateMarginPreview();
+
+// ── SCORING ──────────────────────────────────────────────────────────────
+function clamp(v,a=0,b=100){ return Math.min(b,Math.max(a,v)); }
+
+function scoreFinancial(rev, exp, ind) {
+  const margin = (rev - exp) / rev * 100;
+  const bench = BENCHMARKS[ind].profitMargin;
+  const ratio = margin / bench;
+  return clamp(ratio * 60 + (margin > 0 ? 20 : 0) + (ratio > 1 ? 20 : ratio * 20));
+}
+function scoreCustomer(rating, returnRate, ind) {
+  const ratingScore = (rating / 5) * 60;
+  const returnScore = Math.min(40, (returnRate / 70) * 40);
+  const bonus = rating >= BENCHMARKS[ind].customerScore ? 10 : 0;
+  const penalty = rating < BENCHMARKS[ind].customerScore ? 5 : 0;
+  return clamp(ratingScore + returnScore + bonus - penalty);
+}
+function scoreOperations(prod, days, defect, ind) {
+  const prodScore = Math.min(40, (prod / BENCHMARKS[ind].employeeProductivity) * 40);
+  const fulfillScore = Math.max(0, 30 - days * 3);
+  const defectScore = Math.max(0, 30 - defect * 3);
+  return clamp(prodScore + fulfillScore + defectScore);
+}
+function scoreMarketing(roi, conv, ind) {
+  const roiScore = Math.min(50, (roi / BENCHMARKS[ind].marketingROI) * 50);
+  const convScore = Math.min(50, conv * 10);
+  return clamp(roiScore + convScore);
+}
+function scoreGrowth(growth, newCust, ind) {
+  const growthScore = Math.min(60, (growth / BENCHMARKS[ind].growthRate) * 60);
+  const custScore = Math.min(40, (newCust / 50) * 40);
+  return clamp(growthScore + custScore);
+}
+
+// ── RISKS ────────────────────────────────────────────────────────────────
+function getRisks(d, scores, ind) {
+  const flags = [];
+  const margin = (d.revenue - d.expenses) / d.revenue * 100;
+  if (margin < 0) flags.push({ level:'critical', msg:'Negative profit margin — the business is operating at a net loss. Immediate cost restructuring required.' });
+  else if (margin < BENCHMARKS[ind].profitMargin * 0.5) flags.push({ level:'critical', msg:`Profit margin (${margin.toFixed(1)}%) is critically below the ${INDUSTRY_LABELS[ind]} benchmark of ${BENCHMARKS[ind].profitMargin}%. Cost audit is urgent.` });
+  if (d.customerRating < 3.5) flags.push({ level:'high', msg:`Customer rating of ${d.customerRating}/5 is below healthy threshold. Elevated churn risk — investigate top complaints immediately.` });
+  if (d.defectRate > 8) flags.push({ level:'high', msg:`Defect/error rate of ${d.defectRate}% far exceeds best practice (<2%). Operational quality control intervention required.` });
+  if (d.marketingROI < 1) flags.push({ level:'high', msg:`Marketing ROI of ${d.marketingROI}× means you are losing money on advertising. Reallocate budget to proven channels.` });
+  if (d.growthRate < 0) flags.push({ level:'critical', msg:'Negative revenue growth detected — the business is actively contracting. Growth strategy review required.' });
+  if (scores.overall < 40) flags.push({ level:'critical', msg:'Overall health score below 40 — business is in critical condition across multiple dimensions.' });
+  if (d.customerReturn < 30) flags.push({ level:'medium', msg:`Customer return rate of ${d.customerReturn}% is low. A loyalty programme or post-purchase follow-up could significantly improve retention.` });
+  if (d.fulfillmentDays > 7) flags.push({ level:'medium', msg:`Order fulfillment averaging ${d.fulfillmentDays} days. Customers increasingly expect sub-3-day delivery — this is a competitive risk.` });
+  return flags;
+}
+
+// ── RECOMMENDATIONS ──────────────────────────────────────────────────────
+function getRecs(scores, d, ind) {
+  const recs = [];
+  const margin = (d.revenue - d.expenses) / d.revenue * 100;
+  const bench = BENCHMARKS[ind];
+  if (scores.financial < 60) {
+    if (margin < bench.profitMargin) recs.push({ cat:'Financial', priority:'High', text:`Profit margin (${margin.toFixed(1)}%) is below the ${INDUSTRY_LABELS[ind]} benchmark of ${bench.profitMargin}%. Conduct a line-by-line expense audit — target 10–15% cost reduction before considering revenue growth strategies.` });
+    recs.push({ cat:'Financial', priority:'Medium', text:'Implement rolling 13-week cash flow forecasting. This is the single highest-return operational tool available to most SMEs — it turns surprises into decisions.' });
+  }
+  if (scores.customer < 65) {
+    recs.push({ cat:'Customer Experience', priority:'High', text:`Introduce an NPS (Net Promoter Score) survey at every touchpoint. The ${INDUSTRY_LABELS[ind]} benchmark rating is ${bench.customerScore}/5 — you are currently at ${d.customerRating}/5. Identify your top 3 complaints and resolve them within 30 days.` });
+    if (d.customerReturn < 40) recs.push({ cat:'Customer Experience', priority:'High', text:'A 5% increase in customer retention increases profits by 25–95% (Bain & Company, 2018). Launch a structured loyalty programme — even a simple points scheme or exclusive early access for repeat customers.' });
+  }
+  if (scores.operations < 60) {
+    recs.push({ cat:'Operations', priority:'High', text:'Apply the 5S methodology (Sort, Set in Order, Shine, Standardise, Sustain) to identify workflow bottlenecks. Map your full process from order receipt to delivery and measure time at each step.' });
+    if (d.defectRate > 5) recs.push({ cat:'Operations', priority:'High', text:`A defect/error rate of ${d.defectRate}% is well above the acceptable threshold of <2%. Implement pre-delivery quality gates — the cost of prevention is 10× lower than the cost of failure.` });
+  }
+  if (scores.marketing < 60) {
+    recs.push({ cat:'Marketing', priority:'Medium', text:`Marketing ROI of ${d.marketingROI}× is below the ${INDUSTRY_LABELS[ind]} benchmark of ${bench.marketingROI}×. Implement UTM tracking across all paid channels, run monthly attribution analysis, and cut any channel consistently returning below 2×.` });
+    recs.push({ cat:'Marketing', priority:'Low', text:'Invest in SEO and organic content. For most SMEs, organic search generates 3–5× the ROI of paid advertising over a 12-month horizon and builds compounding value paid ads cannot.' });
+  }
+  if (scores.growth < 60) {
+    recs.push({ cat:'Growth', priority:'Medium', text:`${INDUSTRY_LABELS[ind]} sector benchmark revenue growth is ${bench.growthRate}% — identify whether your gap is driven by market conditions or internal constraints before committing to a growth investment.` });
+  }
+  if (recs.length === 0) recs.push({ cat:'Strategy', priority:'Low', text:'Business is performing well across all tracked dimensions. Focus on margin optimisation and market expansion. Consider entering adjacent product or service categories.' });
+  return recs;
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────
+function healthTier(s) {
+  if (s >= 80) return { label:'Excellent', color:'#00c896' };
+  if (s >= 65) return { label:'Good', color:'#00d4aa' };
+  if (s >= 50) return { label:'Moderate', color:'#f5a623' };
+  if (s >= 35) return { label:'At Risk', color:'#ff6b35' };
+  return { label:'Critical', color:'#ff4757' };
+}
+
+function getVal(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+// ── TABS ─────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['overview','scores','risks','recs','ai'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function goBack() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('input-section').style.display = 'block';
+}
+
+// ── SVG RING ─────────────────────────────────────────────────────────────
+function makeRing(score, label, size, isMain=false) {
+  const r = size * 0.38;
+  const circ = 2 * Math.PI * r;
+  const { color } = healthTier(score);
+  const offset = circ - (score / 100) * circ;
+  const fs = isMain ? size * 0.24 : size * 0.22;
+  return `
+    <div class="ring-wrap">
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#0c1422" stroke-width="${size*0.085}"/>
+        <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${size*0.085}"
+          stroke-dasharray="${circ}" stroke-dashoffset="${offset}"
+          stroke-linecap="round" transform="rotate(-90 ${size/2} ${size/2})"
+          style="transition:stroke-dashoffset 1.2s cubic-bezier(0.34,1.56,0.64,1)"/>
+        <text x="${size/2}" y="${size/2 + fs*0.4}" text-anchor="middle" fill="${color}"
+          font-size="${fs}" font-weight="800" font-family="Space Grotesk, sans-serif">${Math.round(score)}</text>
+      </svg>
+      <span class="ring-label">${label}</span>
+    </div>`;
+}
+
+// ── MAIN ANALYSIS ────────────────────────────────────────────────────────
+async function runAnalysis() {
+  const d = {
+    revenue: getVal('revenue'), expenses: getVal('expenses'),
+    customerRating: getVal('customerRating'), customerReturn: getVal('customerReturn'),
+    employeeProductivity: getVal('employeeProductivity'), fulfillmentDays: getVal('fulfillmentDays'),
+    defectRate: getVal('defectRate'), marketingROI: getVal('marketingROI'),
+    conversionRate: getVal('conversionRate'), growthRate: getVal('growthRate'),
+    newCustomers: getVal('newCustomers'),
+  };
+  const ind = document.getElementById('industry').value;
+  const bizName = document.getElementById('bizName').value || 'Your Business';
+
+  document.getElementById('loadingOverlay').classList.add('show');
+  await new Promise(r => setTimeout(r, 900));
+
+  // Score
+  const fin  = scoreFinancial(d.revenue, d.expenses, ind);
+  const cust = scoreCustomer(d.customerRating, d.customerReturn, ind);
+  const ops  = scoreOperations(d.employeeProductivity, d.fulfillmentDays, d.defectRate, ind);
+  const mkt  = scoreMarketing(d.marketingROI, d.conversionRate, ind);
+  const grw  = scoreGrowth(d.growthRate, d.newCustomers, ind);
+  const overall = fin*0.30 + cust*0.20 + ops*0.20 + mkt*0.15 + grw*0.15;
+  const scores = { financial:fin, customer:cust, operations:ops, marketing:mkt, growth:grw, overall };
+
+  const tier = healthTier(overall);
+  const flags = getRisks(d, scores, ind);
+  const recs = getRecs(scores, d, ind);
+  const margin = (d.revenue - d.expenses) / d.revenue * 100;
+  const bench = BENCHMARKS[ind];
+
+  // ── POPULATE RESULTS HEADER
+  document.getElementById('rBizName').textContent = bizName;
+  document.getElementById('rIndustry').textContent = INDUSTRY_LABELS[ind] + ' · ' + new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const scoreEl = document.getElementById('rOverallScore');
+  scoreEl.textContent = Math.round(overall);
+  scoreEl.style.color = tier.color;
+  const labelEl = document.getElementById('rHealthLabel');
+  labelEl.textContent = tier.label;
+  labelEl.style.color = tier.color;
+
+  // ── RINGS
+  document.getElementById('ringsGrid').innerHTML =
+    makeRing(overall, 'Overall Health', 96, true) +
+    makeRing(fin,  'Financial', 72) +
+    makeRing(cust, 'Customer', 72) +
+    makeRing(ops,  'Operations', 72) +
+    makeRing(mkt,  'Marketing', 72) +
+    makeRing(grw,  'Growth', 72);
+
+  // ── STAT TILES
+  const mEl = document.getElementById('st-margin');
+  mEl.textContent = margin.toFixed(1) + '%';
+  mEl.style.color = margin >= bench.profitMargin ? '#00c896' : margin > 0 ? '#f5a623' : '#ff4757';
+  document.getElementById('st-margin-sub').textContent = `Benchmark: ${bench.profitMargin}%`;
+
+  const rEl = document.getElementById('st-rating');
+  rEl.textContent = d.customerRating + '/5';
+  rEl.style.color = d.customerRating >= bench.customerScore ? '#00c896' : '#f5a623';
+  document.getElementById('st-rating-sub').textContent = `Benchmark: ${bench.customerScore}/5`;
+
+  const fEl = document.getElementById('st-flags');
+  const critCount = flags.filter(f=>f.level==='critical').length;
+  fEl.textContent = flags.length;
+  fEl.style.color = critCount > 0 ? '#ff4757' : flags.length > 3 ? '#f5a623' : '#00c896';
+  document.getElementById('st-flags-sub').textContent = `${critCount} critical`;
+
+  // ── CRITICAL ALERT
+  const crit = flags.filter(f=>f.level==='critical');
+  document.getElementById('criticalAlert').innerHTML = crit.length > 0 ? `
+    <div class="critical-alert">
+      <div class="critical-alert-title">🚨 ${crit.length} Critical Issue${crit.length>1?'s':''} Detected</div>
+      ${crit.map(f=>`<div class="critical-alert-item">• ${f.msg}</div>`).join('')}
+    </div>` : '';
+
+  // ── DIMENSION BARS
+  const dims = [
+    { label:'Financial Health', key:'financial', weight:'30%' },
+    { label:'Customer Experience', key:'customer', weight:'20%' },
+    { label:'Operational Efficiency', key:'operations', weight:'20%' },
+    { label:'Marketing Effectiveness', key:'marketing', weight:'15%' },
+    { label:'Growth Momentum', key:'growth', weight:'15%' },
+  ];
+  document.getElementById('dimBars').innerHTML = dims.map(dim => {
+    const s = scores[dim.key];
+    const t = healthTier(s);
+    const barColor = s >= 80 ? 'linear-gradient(90deg,#00c896,#00d4aa)' :
+                     s >= 65 ? 'linear-gradient(90deg,#3b7fff,#00d4aa)' :
+                     s >= 50 ? 'linear-gradient(90deg,#f5a623,#ff9500)' :
+                     'linear-gradient(90deg,#ff4757,#ff6b35)';
+    return `
+      <div class="dim-row">
+        <div class="dim-row-header">
+          <div class="dim-row-label">${dim.label}<span class="weight-tag">${dim.weight}</span></div>
+          <div class="dim-row-right">
+            <span class="dim-score-num" style="color:${t.color}">${Math.round(s)}</span>
+            <span class="dim-score-tier">${t.label}</span>
+          </div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${s}%;background:${barColor}"></div></div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('formulaBox').innerHTML =
+    `<strong style="color:var(--accent2)">Weighted Score Calculation</strong><br>
+    BHS = (${Math.round(fin)}×0.30) + (${Math.round(cust)}×0.20) + (${Math.round(ops)}×0.20) + (${Math.round(mkt)}×0.15) + (${Math.round(grw)}×0.15) = <strong style="color:${tier.color}">${overall.toFixed(1)}/100</strong>`;
+
+  // ── RISK FLAGS
+  const flagIcons = { critical:'🔴', high:'🟡', medium:'🔵' };
+  document.getElementById('flagsList').innerHTML = flags.length === 0
+    ? '<div class="no-flags">✅ No significant risk flags detected. Business metrics are within healthy ranges.</div>'
+    : flags.map(f => `
+        <div class="flag ${f.level}">
+          <div class="flag-icon">${flagIcons[f.level]}</div>
+          <div>
+            <div class="flag-level">${f.level} risk</div>
+            <div class="flag-msg">${f.msg}</div>
+          </div>
+        </div>`).join('');
+
+  // ── RECOMMENDATIONS
+  document.getElementById('recsList').innerHTML = recs.map(r => `
+    <div class="rec ${r.priority==='High'?'high-p':r.priority==='Medium'?'med-p':'low-p'}">
+      <div class="rec-tags">
+        <span class="rec-tag cat">${r.cat}</span>
+        <span class="rec-tag ${r.priority==='High'?'hp':r.priority==='Medium'?'mp':'lp'}">${r.priority} Priority</span>
+      </div>
+      <div class="rec-text">${r.text}</div>
+    </div>`).join('');
+
+  // ── SHOW RESULTS
+  document.getElementById('loadingOverlay').classList.remove('show');
+  document.getElementById('input-section').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // ── AI SUMMARY (async)
+  document.getElementById('aiContent').innerHTML = '<div class="ai-loading"><div class="ai-spinner"></div> Generating executive summary with Claude AI...</div>';
+
+  try {
+    const prompt = `You are a senior business analyst producing an executive summary for a ${INDUSTRY_LABELS[ind]} small business called "${bizName}".
+
+Business metrics:
+- Monthly Revenue: AED ${d.revenue.toLocaleString()}, Expenses: AED ${d.expenses.toLocaleString()}, Profit Margin: ${margin.toFixed(1)}% (industry benchmark: ${bench.profitMargin}%)
+- Customer Rating: ${d.customerRating}/5 (benchmark: ${bench.customerScore}/5), Return Rate: ${d.customerReturn}%
+- Employee Productivity: ${d.employeeProductivity}%, Fulfillment: ${d.fulfillmentDays} days, Defect Rate: ${d.defectRate}%
+- Marketing ROI: ${d.marketingROI}× (benchmark: ${bench.marketingROI}×), Conversion Rate: ${d.conversionRate}%
+- Revenue Growth: ${d.growthRate}% (benchmark: ${bench.growthRate}%), New Customers/Mo: ${d.newCustomers}
+
+AI Scores (out of 100): Financial ${Math.round(fin)}, Customer ${Math.round(cust)}, Operations ${Math.round(ops)}, Marketing ${Math.round(mkt)}, Growth ${Math.round(grw)}, OVERALL ${overall.toFixed(1)}
+Health Tier: ${tier.label}
+Risk flags: ${flags.length} (${flags.filter(f=>f.level==='critical').length} critical)
+
+Write a concise 3-paragraph executive summary. Be direct, data-specific, and professional. Do not use bullet points.
+
+Paragraph 1: Overall business health assessment referencing the score and tier.
+Paragraph 2: The 2 strongest performing dimensions with specific data points.
+Paragraph 3: The 2 most critical actions the owner should take in the next 30 days, with specific targets.`;
+
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const json = await resp.json();
+    const text = json.content?.[0]?.text || "AI summary unavailable.";
+
+    // Typewriter effect
+    document.getElementById('aiContent').innerHTML = '<div class="ai-text" id="aiText"></div><span class="typing-cursor" id="cursor"></span>';
+    const textEl = document.getElementById('aiText');
+    let i = 0;
+    const type = () => {
+      if (i < text.length) {
+        textEl.textContent += text[i++];
+        setTimeout(type, 12);
+      } else {
+        const cur = document.getElementById('cursor');
+        if (cur) cur.style.display = 'none';
+      }
+    };
+    type();
+  } catch(e) {
+    document.getElementById('aiContent').innerHTML = '<div class="ai-text" style="color:var(--muted)">AI summary unavailable — check API connectivity.</div>';
+  }
+}
+</script>
+</body>
+</html>
